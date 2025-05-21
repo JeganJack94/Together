@@ -51,7 +51,7 @@ export const addTrip = async (userId: string, tripData: Omit<TripType, 'id' | 'c
     return {
       id: docRef.id,
       ...newTripData,
-      dateRange: formatDateRange(newTripData.startDate, newTripData.endDate),
+      dateRange: formatDateRange(newTripData.startDate as string, newTripData.endDate as string),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     } as TripType;
