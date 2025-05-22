@@ -11,7 +11,7 @@ const LandingPage: React.FC<NavigationProps> = ({ navigateTo }) => {
       <header className="fixed w-full top-0 bg-white shadow-sm z-10">
         <div className="flex justify-between items-center px-4 py-3">
           <div className="flex items-center">
-            <div className="w-8 h-8 bg-purple-700 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold">Tg</span>
             </div>
             <span className="ml-2 font-semibold text-lg">ToGether</span>
@@ -19,13 +19,13 @@ const LandingPage: React.FC<NavigationProps> = ({ navigateTo }) => {
           <div className="flex items-center space-x-3">
             <button 
               onClick={() => navigateTo('signin')}
-              className="text-sm text-gray-700 font-medium px-3 py-1.5 rounded-lg hover:bg-gray-100 transition cursor-pointer"
+              className="text-sm text-white font-medium px-3 py-1.5 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg hover:opacity-90 transition cursor-pointer"
             >
               Sign In
             </button>
             <button 
               onClick={() => navigateTo('signup')}
-              className="text-sm text-white font-medium px-3 py-1.5 bg-purple-700 rounded-lg hover:bg-purple-800 transition shadow-sm cursor-pointer !rounded-button"
+              className="text-sm text-white font-medium px-3 py-1.5 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg hover:opacity-90 transition shadow-sm cursor-pointer !rounded-button"
             >
               Sign Up
             </button>
@@ -46,7 +46,7 @@ const LandingPage: React.FC<NavigationProps> = ({ navigateTo }) => {
             </p>
             <button 
               onClick={() => navigateTo('signup')}
-              className="bg-purple-700 text-white font-medium px-6 py-3 rounded-lg shadow-md hover:bg-purple-800 transition transform hover:scale-105 mb-8 cursor-pointer !rounded-button"
+              className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium px-6 py-3 rounded-lg shadow-md hover:opacity-90 transition transform hover:scale-105 mb-8 cursor-pointer !rounded-button"
             >
               Get Started — It's Free
             </button>
@@ -67,7 +67,7 @@ const LandingPage: React.FC<NavigationProps> = ({ navigateTo }) => {
             {/* Feature 1 */}
             <div className="flex flex-col items-center text-center p-4">
               <div className="w-16 h-16 mb-4 rounded-full bg-purple-100 flex items-center justify-center">
-                <i className="fas fa-users text-purple-700 text-xl"></i>
+                <i className="fas fa-usersbg-gradient-to-r from-blue-500 to-indigo-600 text-xl"></i>
               </div>
               <h3 className="font-semibold text-lg mb-2">Group Trip Planning</h3>
               <p className="text-gray-600 text-sm">

@@ -41,7 +41,7 @@ const SignInPage: React.FC<NavigationProps> = ({ navigateTo }) => {
             className="flex items-center cursor-pointer"
             onClick={() => navigateTo('landing')}
           >
-            <div className="w-8 h-8 bg-purple-700 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold">Tg</span>
             </div>
             <span className="ml-2 font-semibold text-lg">ToGether</span>
@@ -67,7 +67,7 @@ const SignInPage: React.FC<NavigationProps> = ({ navigateTo }) => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
                   placeholder="you@example.com"
                   required
                 />
@@ -78,7 +78,7 @@ const SignInPage: React.FC<NavigationProps> = ({ navigateTo }) => {
                   <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                     Password
                   </label>
-                  <a href="#" className="text-xs text-purple-700 hover:text-purple-800 cursor-pointer">
+                  <a href="#" className="text-xs text-indigo-700 hover:text-indigo-800 cursor-pointer">
                     Forgot password?
                   </a>
                 </div>
@@ -88,7 +88,7 @@ const SignInPage: React.FC<NavigationProps> = ({ navigateTo }) => {
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
                     placeholder="••••••••"
                     required
                   />
@@ -108,7 +108,7 @@ const SignInPage: React.FC<NavigationProps> = ({ navigateTo }) => {
                   type="checkbox"
                   checked={rememberMe}
                   onChange={() => setRememberMe(!rememberMe)}
-                  className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                 />
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
                   Remember me
@@ -118,7 +118,7 @@ const SignInPage: React.FC<NavigationProps> = ({ navigateTo }) => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-purple-700 hover:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 cursor-pointer !rounded-button"
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer !rounded-button"
               >
                 {isLoading ? (
                   <i className="fas fa-circle-notch fa-spin"></i>
@@ -132,7 +132,7 @@ const SignInPage: React.FC<NavigationProps> = ({ navigateTo }) => {
           <p className="text-center mt-6 text-sm text-gray-600 w-full">
             Don't have an account?{" "}
             <span 
-              className="font-medium text-purple-700 hover:text-purple-800 cursor-pointer"
+              className="font-medium text-indigo-700 hover:text-indigo-800 cursor-pointer"
               onClick={() => navigateTo('signup')}
             >
               Sign up

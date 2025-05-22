@@ -258,14 +258,15 @@ const Expenses: React.FC = () => {
     thresholds.forEach((threshold) => {
       const notificationKey = `budget-threshold-${trip}-${threshold}`;
       const shouldNotify = Math.floor(percentSpent) >= threshold;
+      // Only send notification if not already sent in this session (memory) or localStorage
       if (shouldNotify && !wasNotified(notificationKey) && canSendNotificationToday()) {
         const notificationTitle = `Budget Alert for ${tripName}`;
-        const notificationMessage = `You've used ${percentSpent.toFixed(0)}% of your budget (₹${totalSpent.toLocaleString()} of ₹${budget.toLocaleString()}).`;
+        const notificationMessage = `You've used ${threshold}% of your budget (₹${totalSpent.toLocaleString()} of ₹${budget.toLocaleString()}).`;
         if (typeof notifications.sendNotification === 'function') {
           notifications.sendNotification(notificationTitle, {
             body: notificationMessage,
             icon: '/logo192.png',
-            tag: `budget-threshold-${threshold}`,
+            tag: notificationKey, // Use unique tag to prevent duplicates
             requireInteraction: true
           });
         }

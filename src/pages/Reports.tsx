@@ -35,7 +35,15 @@ const Reports: React.FC = () => {
   const reportRef = useRef<HTMLDivElement>(null);
 
   const formatDate = (timestamp: { seconds: number; nanoseconds: number } | string): string => {
-    if (typeof timestamp === 'string') return timestamp;
+    if (typeof timestamp === 'string') {
+      const dateObj = new Date(timestamp);
+      if (isNaN(dateObj.getTime())) return timestamp;
+      return dateObj.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      });
+    }
     const date = new Date(timestamp.seconds * 1000);
     return date.toLocaleDateString('en-US', {
       month: 'short',
@@ -68,8 +76,8 @@ const Reports: React.FC = () => {
         return {
           id: doc.id,
           name: data.name,
-          startDate: formatDate(data.startDate),
-          endDate: formatDate(data.endDate),
+          startDate: data.startDate, // store raw value
+          endDate: data.endDate,     // store raw value
           members,
           budget: parseFloat(data.totalBudget) || 0,
         };
@@ -275,7 +283,7 @@ ${categoryBreakdown}
           >
             {trips.map((trip) => (
               <option key={trip.id} value={trip.id}>
-                {trip.name} ({trip.startDate} - {trip.endDate})
+                {trip.name} ({formatDate(trip.startDate)} - {formatDate(trip.endDate)})
               </option>
             ))}
           </select>
@@ -339,14 +347,14 @@ ${categoryBreakdown}
               // Calculate percentage for the progress bar (max 100%)
               const maxSpending = Math.max(...Object.values(dailySpending));
               const spendingPercentage = (amount / maxSpending) * 100;
-              
               return (
                 <div key={date} className="mb-4">
                   <div className="flex items-center justify-between mb-1">
                     <p className="text-sm dark:text-gray-300">
                       {new Date(date).toLocaleDateString('en-US', { 
                         month: 'short',
-                        day: 'numeric'
+                        day: 'numeric',
+                        year: 'numeric'
                       })}
                     </p>
                     <p className="text-sm font-semibold dark:text-white">₹{amount.toFixed(2)}</p>
@@ -391,7 +399,7 @@ ${categoryBreakdown}
           <h2 className="text-xl font-bold mb-4">Trip Report</h2>
           <div className="mb-4">
             <strong>Trip:</strong> {trips.find(trip => trip.id === selectedTripId)?.name}<br />
-            <strong>Date:</strong> {trips.find(trip => trip.id === selectedTripId)?.startDate} - {trips.find(trip => trip.id === selectedTripId)?.endDate}<br />
+            <strong>Date:</strong> {formatDate(trips.find(trip => trip.id === selectedTripId)?.startDate || '')} - {formatDate(trips.find(trip => trip.id === selectedTripId)?.endDate || '')}<br />
             <strong>Members:</strong> {tripMembers}<br />
             <strong>Budget:</strong> ₹{budget.toFixed(2)}<br />
             <strong>Total Spent:</strong> ₹{totalSpent.toFixed(2)}<br />

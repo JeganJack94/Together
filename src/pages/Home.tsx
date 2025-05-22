@@ -9,6 +9,7 @@ import TripDetails from './TripDetails';
 import { toast } from 'react-hot-toast';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../config/firebase'; // Make sure this path is correct for your firebase config
+import { useNotificationContext } from '../contexts/NotificationProvider';
 
 // Extend the TripType with budget tracking properties
 interface ExtendedTripType extends TripType {
@@ -25,6 +26,7 @@ const Home: React.FC = () => {
   const [showAddTripModal, setShowAddTripModal] = useState(false);
   const [selectedTrip, setSelectedTrip] = useState<ExtendedTripType | null>(null);
   const [showTripDetailsModal, setShowTripDetailsModal] = useState(false);
+  const { addNotification } = useNotificationContext() || {};
 
   // Raw fetch trips function removed as it's no longer needed
 
@@ -153,39 +155,31 @@ const Home: React.FC = () => {
       return 'Invalid Date';
     }
     
-    // Format as MM/DD/YYYY
+    // Format as May 16, 2025
     return dateObj.toLocaleDateString('en-US', {
       month: 'short',
-      day: 'numeric', 
+      day: 'numeric',
       year: 'numeric'
     });
   };
   
   // Process trips to ensure proper date formatting and budget calculations before rendering
-  const processTripsBeforeRendering = () => {
+  const processTripsBeforeRendering = useCallback(() => {
     return trips.map(trip => {
-      // Ensure the trip always has the correct budget and expense properties
-      // We don't need to recalculate budget values since they are already set in loadTrips
-      
-      // If trip needs date formatting, ensure we do that while preserving budget data
-      if (trip.dateRange === 'Invalid Date - Invalid Date' || !trip.dateRange) {
-        const startFormatted = formatDateForDisplay(trip.startDate as string | number | Date | FirestoreTimestamp);
-        const endFormatted = formatDateForDisplay(trip.endDate as string | number | Date | FirestoreTimestamp);
-        return {
-          ...trip,
-          dateRange: `${startFormatted} - ${endFormatted}`
-        };
-      }
-      
-      return trip;
+      // Always format dateRange for every trip
+      const startFormatted = formatDateForDisplay(trip.startDate as string | number | Date | FirestoreTimestamp);
+      const endFormatted = formatDateForDisplay(trip.endDate as string | number | Date | FirestoreTimestamp);
+      return {
+        ...trip,
+        dateRange: `${startFormatted} - ${endFormatted}`
+      };
     });
-  };
-  
+  }, [trips, formatDateForDisplay]);
 
   // Categorize trips based on current date
   // Using a fixed date for development/testing purposes (May 21, 2025 as seen in the UI)
   // This helps ensure consistent categorization regardless of when the code runs
-  const today = new Date('2025-05-21');
+  const today = new Date();
   // Uncomment the line below for production use with actual current date
   // const today = new Date();
 
@@ -195,76 +189,45 @@ const Home: React.FC = () => {
     const upcoming: ExtendedTripType[] = [];
     const history: ExtendedTripType[] = [];
 
-    // Use the processed trips with proper date formatting and budget calculations
     const tripsToProcess = processTripsBeforeRendering() as ExtendedTripType[];
     
     tripsToProcess.forEach(trip => {
       if (!trip.startDate || !trip.endDate) {
-        // If dates are missing, skip categorization
         return;
       }
-      
-      // Convert dates to JavaScript Date objects for comparison
       let startDate: Date;
       let endDate: Date;
-      
       try {
-        if (trip.startDate && typeof trip.startDate === 'object' && 'seconds' in trip.startDate) {
-          // If it's a Firestore Timestamp
-          const timestamp = trip.startDate as FirestoreTimestamp;
-          startDate = new Date(timestamp.seconds * 1000);
+        if (typeof trip.startDate === 'object' && 'seconds' in trip.startDate) {
+          const ts = trip.startDate as FirestoreTimestamp;
+          startDate = new Date(ts.seconds * 1000);
         } else {
-          // For any other format, try direct conversion
           startDate = new Date(String(trip.startDate));
         }
-        
-        if (trip.endDate && typeof trip.endDate === 'object' && 'seconds' in trip.endDate) {
-          // If it's a Firestore Timestamp
-          const timestamp = trip.endDate as FirestoreTimestamp;
-          endDate = new Date(timestamp.seconds * 1000);
+        if (typeof trip.endDate === 'object' && 'seconds' in trip.endDate) {
+          const ts = trip.endDate as FirestoreTimestamp;
+          endDate = new Date(ts.seconds * 1000);
         } else {
-          // For any other format, try direct conversion
           endDate = new Date(String(trip.endDate));
         }
-        
         if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-          // If dates are invalid after conversion, skip categorization
-          // Try to parse from the formatted dateRange as a fallback
-          if (trip.dateRange) {
-            const [startStr, endStr] = trip.dateRange.split(' - ');
-            if (startStr && endStr) {
-              startDate = new Date(startStr);
-              endDate = new Date(endStr);
-              
-              if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-                return; // Still invalid, skip this trip
-              }
-            } else {
-              return; // Invalid dateRange format, skip this trip
-            }
-          } else {
-            return; // No dateRange to fallback on, skip this trip
-          }
+          return; // skip if invalid
         }
-        
-        // Compare dates only (ignoring time) to ensure trips on today's date are properly categorized
+        // Compare only the date part (ignore time)
         const todayDateOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
         const startDateOnly = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
         const endDateOnly = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
-        
-        if ((todayDateOnly >= startDateOnly && todayDateOnly <= endDateOnly) || 
-            startDateOnly.getTime() === todayDateOnly.getTime()) {
+        if (todayDateOnly >= startDateOnly && todayDateOnly <= endDateOnly) {
           active.push(trip);
         } else if (todayDateOnly < startDateOnly) {
           upcoming.push(trip);
-        } else {
+        } else if (todayDateOnly > endDateOnly) {
           history.push(trip);
         }
       } catch {
-        // Silent error handling for date processing
+        // skip trip on error
       }
     });
-    
     return { active, upcoming, history };
   };
 
@@ -280,6 +243,58 @@ const Home: React.FC = () => {
   const filteredTripHistory = tripHistory.filter(trip =>
     trip.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Notify for upcoming trips (one day before and on start date)
+  useEffect(() => {
+    if (!user) return;
+    const today = new Date();
+    const tomorrow = new Date();
+    tomorrow.setDate(today.getDate() + 1);
+
+    const formatDate = (date: Date) => date.toISOString().slice(0, 10);
+    const todayStr = formatDate(today);
+    const tomorrowStr = formatDate(tomorrow);
+
+    processTripsBeforeRendering().forEach(trip => {
+      if (!trip.startDate) return;
+      let startDate: Date;
+      if (typeof trip.startDate === 'object' && 'seconds' in trip.startDate) {
+        const ts = trip.startDate as FirestoreTimestamp;
+        startDate = new Date(ts.seconds * 1000);
+      } else {
+        startDate = new Date(String(trip.startDate));
+      }
+      const startStr = formatDate(startDate);
+      // One day before notification
+      if (startStr === tomorrowStr) {
+        const notiKey = `trip-upcoming-tomorrow-${trip.id}`;
+        if (!localStorage.getItem(notiKey)) {
+          const title = `Trip "${trip.name}" starts tomorrow!`;
+          const message = `Get ready for your trip: ${trip.name} starting on ${startDate.toLocaleDateString()}`;
+          // Push notification
+          if (window.Notification && Notification.permission === 'granted') {
+            new Notification(title, { body: message, tag: notiKey });
+          }
+          // Internal notification
+          addNotification?.(title, message);
+          localStorage.setItem(notiKey, 'true');
+        }
+      }
+      // On start date notification
+      if (startStr === todayStr) {
+        const notiKey = `trip-start-today-${trip.id}`;
+        if (!localStorage.getItem(notiKey)) {
+          const title = `Trip "${trip.name}" starts today!`;
+          const message = `Your trip: ${trip.name} starts today. Have a great journey!`;
+          if (window.Notification && Notification.permission === 'granted') {
+            new Notification(title, { body: message, tag: notiKey });
+          }
+          addNotification?.(title, message);
+          localStorage.setItem(notiKey, 'true');
+        }
+      }
+    });
+  }, [user, trips, addNotification, processTripsBeforeRendering]);
 
   if (isLoading) {
     return (

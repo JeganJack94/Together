@@ -57,7 +57,7 @@ const SignUpPage: React.FC<NavigationProps> = ({ navigateTo }) => {
             className="flex items-center cursor-pointer"
             onClick={() => navigateTo('landing')}
           >
-            <div className="w-8 h-8 bg-purple-700 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold">Tg</span>
             </div>
             <span className="ml-2 font-semibold text-lg">ToGether</span>
@@ -81,9 +81,9 @@ const SignUpPage: React.FC<NavigationProps> = ({ navigateTo }) => {
                   <div 
                     className={`w-6 h-6 rounded-full flex items-center justify-center ${
                       index + 1 === step 
-                        ? 'bg-purple-700 text-white' 
+                        ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white' 
                         : index + 1 < step 
-                          ? 'bg-purple-200 text-purple-700' 
+                          ? 'bg-indigo-200 text-indigo-700' 
                           : 'bg-gray-200 text-gray-500'
                     }`}
                   >
@@ -96,7 +96,7 @@ const SignUpPage: React.FC<NavigationProps> = ({ navigateTo }) => {
                   {index < totalSteps - 1 && (
                     <div 
                       className={`flex-1 h-1 ${
-                        index + 1 < step ? 'bg-purple-200' : 'bg-gray-200'
+                        index + 1 < step ? 'bg-indigo-200' : 'bg-gray-200'
                       }`}
                     ></div>
                   )}
@@ -117,7 +117,7 @@ const SignUpPage: React.FC<NavigationProps> = ({ navigateTo }) => {
                         type="text"
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
                         placeholder="John"
                         required
                       />
@@ -131,7 +131,7 @@ const SignUpPage: React.FC<NavigationProps> = ({ navigateTo }) => {
                         type="text"
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
                         placeholder="Doe"
                         required
                       />
@@ -147,7 +147,7 @@ const SignUpPage: React.FC<NavigationProps> = ({ navigateTo }) => {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
                       placeholder="you@example.com"
                       required
                     />
@@ -156,7 +156,7 @@ const SignUpPage: React.FC<NavigationProps> = ({ navigateTo }) => {
                   <button
                     type="button"
                     onClick={handleNextStep}
-                    className="w-full py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-purple-700 hover:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 cursor-pointer !rounded-button"
+                    className="w-full py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer !rounded-button"
                   >
                     Continue
                   </button>
@@ -175,7 +175,7 @@ const SignUpPage: React.FC<NavigationProps> = ({ navigateTo }) => {
                         type={showPassword ? "text" : "password"}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
                         placeholder="••••••••"
                         required
                       />
@@ -198,11 +198,11 @@ const SignUpPage: React.FC<NavigationProps> = ({ navigateTo }) => {
                       type="checkbox"
                       checked={agreeTerms}
                       onChange={() => setAgreeTerms(!agreeTerms)}
-                      className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                       required
                     />
                     <label htmlFor="terms" className="ml-2 block text-sm text-gray-700">
-                      I agree to the <a href="#" className="text-purple-700 hover:text-purple-800">Terms of Service</a> and <a href="#" className="text-purple-700 hover:text-purple-800">Privacy Policy</a>
+                      I agree to the <a href="#" className="text-indigo-700 hover:text-indigo-800">Terms of Service</a> and <a href="#" className="text-indigo-700 hover:text-indigo-800">Privacy Policy</a>
                     </label>
                   </div>
 
@@ -210,14 +210,14 @@ const SignUpPage: React.FC<NavigationProps> = ({ navigateTo }) => {
                     <button
                       type="button"
                       onClick={handlePrevStep}
-                      className="flex-1 py-2 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 cursor-pointer !rounded-button"
+                      className="flex-1 py-2 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer !rounded-button"
                     >
                       Back
                     </button>
                     <button
                       type="submit"
                       disabled={isLoading || !agreeTerms}
-                      className="flex-1 flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-purple-700 hover:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer !rounded-button"
+                      className="flex-1 flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer !rounded-button"
                     >
                       {isLoading ? (
                         <i className="fas fa-circle-notch fa-spin"></i>
@@ -233,7 +233,7 @@ const SignUpPage: React.FC<NavigationProps> = ({ navigateTo }) => {
           <p className="text-center mt-6 text-sm text-gray-600">
             Already have an account?{" "}
             <span 
-              className="font-medium text-purple-700 hover:text-purple-800 cursor-pointer"
+              className="font-medium text-indigo-700 hover:text-indigo-800 cursor-pointer"
               onClick={() => navigateTo('signin')}
             >
               Sign in

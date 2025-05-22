@@ -18,7 +18,6 @@ interface Trip {
 interface ProfileStats {
   totalTrips: number;
   activeTrips: number;
-  totalSpent: string;
 }
 
 interface ProfileProps {
@@ -44,8 +43,7 @@ const Profile: React.FC<ProfileProps> = ({ darkMode, toggleDarkMode }) => {
   // State for profile statistics
   const [stats, setStats] = useState<ProfileStats>({
     totalTrips: 0,
-    activeTrips: 0,
-    totalSpent: '₹0'
+    activeTrips: 0
   });
 
   // State for loading status
@@ -96,7 +94,7 @@ const Profile: React.FC<ProfileProps> = ({ darkMode, toggleDarkMode }) => {
       // Use user from AuthContext
       const currentUser = authUser;
       if (!currentUser || !currentUser.uid) {
-        setStats({ totalTrips: 0, activeTrips: 0, totalSpent: '₹0' });
+        setStats({ totalTrips: 0, activeTrips: 0 });
         setIsLoading(false);
         return;
       }
@@ -105,35 +103,20 @@ const Profile: React.FC<ProfileProps> = ({ darkMode, toggleDarkMode }) => {
       const tripsSnapshot = await getDocs(tripsCollectionRef);
       let totalTrips = 0;
       let activeTrips = 0;
-      let totalSpentAmount = 0;
       tripsSnapshot.forEach((doc) => {
         const tripData = doc.data() as Trip;
         totalTrips++;
         if (tripData.endDate && new Date(tripData.endDate) > new Date()) {
           activeTrips++;
         }
-        if (tripData.expenses && Array.isArray(tripData.expenses)) {
-          tripData.expenses.forEach((expense: { amount?: string | number }) => {
-            if (expense.amount !== undefined && !isNaN(Number(expense.amount))) {
-              totalSpentAmount += parseFloat(String(expense.amount));
-            }
-          });
-        }
       });
-      const formatter = new Intl.NumberFormat('en-IN', {
-        style: 'currency',
-        currency: 'INR',
-        maximumFractionDigits: 0
-      });
-      const formattedAmount = formatter.format(totalSpentAmount);
       setStats({
         totalTrips,
-        activeTrips,
-        totalSpent: formattedAmount
+        activeTrips
       });
       setIsLoading(false);
     } catch {
-      setStats({ totalTrips: 0, activeTrips: 0, totalSpent: '₹0' });
+      setStats({ totalTrips: 0, activeTrips: 0 });
       setIsLoading(false);
     }
   }, [authUser, db]);
@@ -220,36 +203,33 @@ const Profile: React.FC<ProfileProps> = ({ darkMode, toggleDarkMode }) => {
     if (!files || files.length === 0) return;
     
     const selectedFile = files[0];
-    
+    // Check file size (limit to 200KB for localStorage safety)
+    const maxSize = 200 * 1024; // 200KB
+    if (selectedFile.size > maxSize) {
+      alert('Image is too large. Please select an image smaller than 200KB.');
+      return;
+    }
     // Start upload
     if (auth.currentUser) {
       setImageUploadLoading(true);
       try {
         // Read the file as data URL (base64)
         const reader = new FileReader();
-        
         reader.onload = () => {
           const dataUrl = reader.result as string;
-          
           // Save to localStorage
           localStorage.setItem('profileImage', dataUrl);
-          
           // Update user profile (only updating local state, not Firebase)
-          // Update local state
           setUser(prev => prev ? {...prev, photoURL: dataUrl} : null);
-          
           setImageUploadLoading(false);
-          
           sendNotification('Success', {
             body: 'Profile picture updated successfully',
             icon: '/favicon.ico'
           });
         };
-        
         reader.onerror = () => {
           throw new Error('Failed to read file');
         };
-        
         reader.readAsDataURL(selectedFile);
       } catch {
         sendNotification('Error', {
@@ -263,8 +243,8 @@ const Profile: React.FC<ProfileProps> = ({ darkMode, toggleDarkMode }) => {
 
   return (
     <div className="min-h-screen flex flex-col pb-20 px-4 w-full max-w-md mx-auto bg-gray-50 dark:bg-gray-900 dark:text-white transition-colors duration-200">
-      {/* Profile Header */}
-      <div className="flex flex-col items-center mt-6 mb-8">
+      {/* Profile Header Card */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 mb-3 flex flex-col items-center transition-colors duration-200">
         <div 
           className="w-24 h-24 rounded-full overflow-hidden bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center mb-3 cursor-pointer relative"
           onClick={handleImageClick}
@@ -282,7 +262,6 @@ const Profile: React.FC<ProfileProps> = ({ darkMode, toggleDarkMode }) => {
               {user?.displayName ? user.displayName.split(' ').map((name: string) => name[0]).join('').toUpperCase() : 'U'}
             </span>
           )}
-          
           {/* Hidden file input */}
           <input 
             type="file" 
@@ -291,12 +270,10 @@ const Profile: React.FC<ProfileProps> = ({ darkMode, toggleDarkMode }) => {
             accept="image/*" 
             className="hidden" 
           />
-          
           {/* Upload overlay */}
           <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-200">
             <i className="fas fa-camera text-white text-xl"></i>
           </div>
-          
           {/* Loading indicator */}
           {imageUploadLoading && (
             <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
@@ -315,36 +292,30 @@ const Profile: React.FC<ProfileProps> = ({ darkMode, toggleDarkMode }) => {
             (user?.email || 'No email provided')}
         </p>
       </div>
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 mb-8">
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-3 text-center transition-colors duration-200">
-          {isLoading ? (
-            <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-1"></div>
-          ) : (
-            <p className="text-2xl font-semibold mb-1 dark:text-white">{stats.totalTrips}</p>
-          )}
-          <p className="text-xs text-gray-500 dark:text-gray-400">Total Trips</p>
-        </div>
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-3 text-center transition-colors duration-200">
-          {isLoading ? (
-            <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-1"></div>
-          ) : (
-            <p className="text-2xl font-semibold mb-1 dark:text-white">{stats.activeTrips}</p>
-          )}
-          <p className="text-xs text-gray-500 dark:text-gray-400">Active Trips</p>
-        </div>
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-3 text-center transition-colors duration-200">
-          {isLoading ? (
-            <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-1"></div>
-          ) : (
-            <p className="text-2xl font-semibold mb-1 dark:text-white">{stats.totalSpent}</p>
-          )}
-          <p className="text-xs text-gray-500 dark:text-gray-400">Total Spent</p>
+      {/* Stats Card */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 mb-3 transition-colors duration-200">
+        <h3 className="font-semibold text-lg mb-4 dark:text-white">Stats</h3>
+        <div className="flex justify-between gap-4">
+          <div className="flex-1 flex flex-col items-center">
+            {isLoading ? (
+              <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-1 w-12"></div>
+            ) : (
+              <p className="text-2xl font-semibold mb-1 dark:text-white">{stats.totalTrips}</p>
+            )}
+            <p className="text-xs text-gray-500 dark:text-gray-400">Total Trips</p>
+          </div>
+          <div className="flex-1 flex flex-col items-center">
+            {isLoading ? (
+              <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-1 w-12"></div>
+            ) : (
+              <p className="text-2xl font-semibold mb-1 dark:text-white">{stats.activeTrips}</p>
+            )}
+            <p className="text-xs text-gray-500 dark:text-gray-400">Active Trips</p>
+          </div>
         </div>
       </div>
-      
-      {/* Settings */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-4 mb-4 transition-colors duration-200">
+      {/* Settings Card */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-4 mb-3 transition-colors duration-200">
         <h3 className="font-semibold dark:text-white mb-2">Settings</h3>
         {/* Dark Mode Toggle */}
         <div className="flex items-center justify-between py-3">
@@ -489,7 +460,7 @@ const Profile: React.FC<ProfileProps> = ({ darkMode, toggleDarkMode }) => {
 
       {/* Copyright Footer */}
       <div className="text-center text-xs text-gray-500 dark:text-gray-400 mt-6 mb-2">
-        © {new Date().getFullYear()} WinTech. All rights reserved.
+        © {new Date().getFullYear()} WinTech-together. All rights reserved.
       </div>
     </div>
   );
